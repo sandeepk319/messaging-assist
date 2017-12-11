@@ -1,0 +1,345 @@
+<div ng-controller="DailyReportCtrl" style="margin-top: 20px">
+
+
+  
+    <div class="date-row">
+	    <div class="date-label">From:</div>  
+	    <div class="">
+	        <div class="date-container">
+	            <p class="input-group">
+	
+	              <input type="text" class="form-control" datepicker-popup=""MM-dd-yyyy" ng-model="$parent.fromDate" is-open="fromDateOpened" min-date="minDate" max-date="'2016-06-22'" datepicker-options="fromDateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+	              <span class="input-group-btn">
+	                <button type="button" class="btn btn-default" ng-click="openFromDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+	              </span>
+	            </p>
+	        </div>
+	    </div>
+        <div class="date-label">To:</div>
+        <div class="">
+            <div class="date-container">
+                <p class="input-group">
+                  <input type="text" class="form-control" datepicker-popup="yyyy-MM-dd" ng-model="$parent.toDate" is-open="toDateOpened" min-date="minDate" max-date="'2016-01-01'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="openToDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                  </span>
+                </p>
+            </div>
+        </div>
+
+		
+	    <div  class="date-button">
+		    <button type="button" class="btn btn-primary" ng-model="applyButton" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0" ng-click=""  >
+		        Reset
+		    </button>
+	    </div>
+        <div  class="date-button">
+            <button type="button" class="btn btn-primary" ng-model="applyButton" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0" ng-click="clickApply()" >
+                Apply
+            </button>
+        </div>      
+		
+    </div>
+    
+    
+    <hr />
+    
+   
+    <button type="button" class="btn btn-primary " ng-model="applyButton" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="accordianDisabled.region"   ng-click="clickBreadcrumbRegion()" > Region</button> /
+    <button type="button" class="btn btn-primary " ng-model="applyButton" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="accordianDisabled.district" ng-click="clickBreadcrumbDistrict()">District</button> /
+    <button type="button" class="btn btn-primary " ng-model="applyButton" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="accordianDisabled.store"    ng-click="clickBreadcrumbStore()">Store</button> /
+    <button type="button" class="btn btn-primary " ng-model="applyButton" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="accordianDisabled.associate"ng-click="clickBreadcrumbAssociate()" >Associate</button>
+
+    <hr/>	
+	
+  <accordion close-others="true">
+    <accordion-group heading="Regions"  is-disabled="accordianDisabled.region" is-open="accordianOpen.region">
+	    <table ng-table="regionTableParams" class="table" template-pagination="nopager">
+	        <tr ng-repeat="region in $data | filter: regionOnly"  class="pointer">
+	            <td data-title="'Region'" sortable="'name'" ng-click="clickRegion(region.id, region.name)">
+	                {{region.name}}
+	            </td>
+	            <td data-title="'Total'" sortable="'totalCalls'" ng-click="clickRegion(region.id, region.name)">
+	                {{region.totalCalls}}
+	            </td>
+	            <td data-title="'Accepted %'" sortable="'acceptedCalls'" ng-click="clickRegion(region.id, region.name)">
+		            <span ng-show="region.totalCalls">
+		                {{(region.acceptedCalls*100) / region.totalCalls | number: 1}}% ({{region.acceptedCalls}})
+		            </span>
+		            <span ng-show="!region.totalCalls">
+		             --
+		            </span>
+	            </td>
+	            <td data-title="'Acted %'" sortable="'actedCalls'" ng-click="clickRegion(region.id, region.name)">
+	            	<span ng-show="region.totalCalls">
+	                	{{(region.actedCalls*100) / region.acceptedCalls | number: 1}}% ({{region.actedCalls}})
+	                </span>
+		            <span ng-show="!region.totalCalls">
+		             --
+		            </span>	                
+	            </td>
+	            <td data-title="'Escalated %'" sortable="'escCalls'" ng-class="(region.escCalls > 0) ? 'feedbackRed' : ''" ng-click="clickRegion(region.id, region.name)">
+	            	<span ng-show="region.totalCalls">
+	                	{{(region.escCalls*100) / region.acceptedCalls | number: 1}}% ({{region.escCalls}})
+	                </span>
+		            <span ng-show="!region.totalCalls">
+		             --
+		            </span>	                
+	            </td>
+	            <td data-title="'Avg Feedback'" sortable="'avgFeedback'" ng-click="clickRegion(region.id, region.name)">
+		            <span ng-show="region.totalCalls">
+		                {{region.avgFeedback | number: 2}}
+		            </span>
+		            <span ng-show="!region.totalCalls">
+		             --
+		            </span>		            
+	            </td>
+	            <td data-title="'Daily'" sortable="'avgFeedback'">
+	            	<span ng-show="region.totalCalls > 0">
+						<button style="height:25px; line-height: 12px" type="button" class="btn btn-primary " ng-model="dailyChart" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="false"   ng-click="openModalChart(region.name)" >Chart</button>
+					</span>        
+	            </td>	            
+	        </tr>
+	    </table>
+    </accordion-group>
+    
+    
+    <accordion-group heading="{{selectedRegionName}} Districts" is-disabled="accordianDisabled.district" is-open="accordianOpen.district">
+	    <table ng-table="districtTableParams" class="table" template-pagination="nopager">
+	        <tr ng-repeat="district in $data | filter:selectedRegionId"  class="pointer">
+	            <td data-title="'District'" sortable="'name'" ng-click="clickDistrict(district.id, district.name)">
+	                {{district.name}}
+	            </td>
+	            <td data-title="'Total'" sortable="'totalCalls'" ng-click="clickDistrict(district.id, district.name)">
+	                {{district.totalCalls}}
+	            </td>
+	            <td data-title="'Accepted %'" sortable="'acceptedCalls'" ng-click="clickDistrict(district.id, district.name)">
+		            <span ng-show="district.totalCalls">
+		                {{(district.acceptedCalls*100) / district.totalCalls | number: 1}}% ({{district.acceptedCalls}})
+		            </span>
+		            <span ng-show="!district.totalCalls">
+		             --
+		            </span>		            		            
+	            </td>
+	            <td data-title="'Acted %'" sortable="'actedCalls'" ng-click="clickDistrict(district.id, district.name)">
+		            <span ng-show="district.totalCalls">
+		                {{(district.actedCalls*100) / district.acceptedCalls | number: 1}}% ({{district.actedCalls}})
+		            </span>
+		            <span ng-show="!district.totalCalls">
+		             --
+		            </span>		            
+	            </td>
+	            <td data-title="'Escalated %'" sortable="'escCalls'" ng-class="(district.escCalls > 0) ? 'feedbackRed' : ''" ng-click="clickDistrict(district.id, district.name)">
+					<span ng-show="district.totalCalls">	            
+	                	{{(district.escCalls*100) / district.acceptedCalls | number: 1}}% ({{district.escCalls}})
+	                </span>
+		            <span ng-show="!district.totalCalls">
+		             --
+		            </span>
+	            </td>
+	            <td data-title="'Avg Feedback'" sortable="'avgFeedback'" ng-click="clickDistrict(district.id, district.name)">
+		            <span ng-show="district.totalCalls">
+		                {{district.avgFeedback | number: 2}}
+		            </span>
+		            <span ng-show="!district.totalCalls">
+		             --
+		            </span>		            
+	            </td>
+	            <td data-title="'Daily'" sortable="''">
+	            	<span ng-show="district.totalCalls">
+						<button style="height:25px; line-height: 12px" type="button" class="btn btn-primary " ng-model="dailyChart" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="false"   ng-click="openModalChart(district.name)" >Chart</button>
+					</span>	            
+	            </td>	                        
+	        </tr>
+	    </table>
+    </accordion-group>
+    
+    <accordion-group heading="{{selectedDistrictName}} Stores" is-disabled="accordianDisabled.store" is-open="accordianOpen.store">
+	    <table ng-table="storeTableParams" class="table" template-pagination="nopager">
+	        <tr ng-repeat="store in $data"  class="pointer">
+	            <td data-title="'Store'" sortable="'name'" ng-click="clickStore(store.id, store.name)">
+	                {{store.name}}
+	            </td>
+	            <td data-title="'Total'" sortable="'totalCalls'" ng-click="clickStore(store.id, store.name)">
+	                {{store.totalCalls}}
+	            </td>
+	            <td data-title="'Accepted %'" sortable="'acceptedCalls'" ng-click="clickStore(store.id, store.name)">
+		            <span ng-show="store.totalCalls">
+		                {{(store.acceptedCalls*100) / store.totalCalls | number: 1}}% ({{store.acceptedCalls}})
+		            </span>
+		            <span ng-show="!store.totalCalls">
+		             --
+		            </span>		            		            
+	            </td>
+	            <td data-title="'Acted %'" sortable="'actedCalls'" ng-click="clickStore(store.id, store.name)">
+		            <span ng-show="store.totalCalls">
+		                {{(store.actedCalls*100) / store.acceptedCalls | number: 1}}% ({{store.actedCalls}})
+		            </span>
+		            <span ng-show="!store.totalCalls">
+		             --
+		            </span>		            		            		            
+	            </td>
+	            <td data-title="'Escalated %'" sortable="'escCalls'" ng-class="(store.escCalls > 0) ? 'feedbackRed' : ''" ng-click="clickStore(store.id, store.name)">
+		            <span ng-show="store.totalCalls">
+		                {{(store.escCalls*100) / store.acceptedCalls | number: 1}}% ({{store.escCalls}})
+		            </span>
+		            <span ng-show="!store.totalCalls">
+		             --
+		            </span>		            		            		            
+	            </td>
+	            <td data-title="'Avg Feedback'" sortable="'avgFeedback'" ng-click="clickStore(store.id, store.name)">
+					<span ng-show="store.totalCalls">	            
+	                	{{store.avgFeedback | number: 2}}
+	                </span>
+		            <span ng-show="!store.totalCalls">
+		             --
+		            </span>		            		            	                
+	            <td data-title="'Daily'" sortable="''">
+	            	<span ng-show="store.totalCalls">
+						<button style="height:25px; line-height: 12px" type="button" class="btn btn-primary " ng-model="dailyChart" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="false"   ng-click="openModalChart(store.name)" >Chart</button>
+					</span>	            
+	            </td>
+	            <td           
+	        </tr>
+	    </table>    
+    </accordion-group>    
+    <accordion-group heading="{{selectedStoreName}} Associates" is-disabled="accordianDisabled.associate" is-open="accordianOpen.associate">
+	  
+	    <table ng-table="associateTableParams" class="table">
+	        <tr ng-repeat="associate in $data" >
+	            <td data-title="'Associate'" sortable="'name'">
+	                {{associate.name}}
+	            </td>
+	            <td data-title="'Total'" sortable="'totalCalls'">
+	                {{associate.totalCalls}}
+	            </td>
+	            <td data-title="'Accepted'" sortable="'acceptedCalls'">
+		            <span ng-show="associate.totalCalls">
+		                {{(associate.acceptedCalls*100) / associate.totalCalls | number: 1}}% ({{associate.acceptedCalls}})
+		            </span>
+	            </td>
+	            <td data-title="'Acted'" sortable="'actedCalls'">
+		            <span ng-show="associate.totalCalls">
+		                {{(associate.actedCalls*100) / associate.acceptedCalls | number: 1}}% ({{associate.actedCalls}})
+		            </span>
+		            <span ng-show="!associate.totalCalls">
+		             --
+		            </span>		            		            	                		            
+	            </td>
+	            <td data-title="'Escalated'" sortable="'escCalls'" ng-class="(associate.escCalls > 0) ? 'feedbackRed' : ''">
+		            <span ng-show="associate.totalCalls">
+		                {{(associate.escCalls*100) / associate.acceptedCalls | number: 1}}% ({{associate.escCalls}})
+		            </span>
+		            <span ng-show="!associate.totalCalls">
+		             --
+		            </span>		            		            	                		            		            
+	            </td>
+	            <td data-title="'Avg Feedback'" sortable="'avgFeedback'" >
+		            <span ng-show="associate.totalCalls">
+		                {{associate.avgFeedback | number: 2}}
+		            </span>
+		            <span ng-show="!associate.totalCalls">
+		             --
+		            </span>		            		            	                		            		            
+	            </td>
+	            <td data-title="'Daily'" sortable="'avgFeedback'">
+	            	<span ng-show="associate.totalCalls">
+						<button style="height:25px; line-height: 12px" type="button" class="btn btn-primary " ng-model="dailyChart" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="false"   ng-click="openModalChart(associate.name)">Chart</button>
+					</span>	            
+	            </td>	                        
+	        </tr>
+	    </table>
+    </accordion-group>
+  </accordion>
+
+
+
+
+
+	<script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header" >
+            <h3 class="modal-title">Calls for {{title}}</h3>       
+        </div>
+
+		<div class="modal-body">
+		
+			<div ng-controller="chartCtrl" style="margin-bottom: 15px">
+				<div id="chartContainer"
+					style="width: 600px; height: 200px float:left">
+					<cjs-line dataset="callData" autofit="true"></cjs-line>
+				</div>
+		
+				<div style="width: 100%; height: 40px; margin-top: 10px">
+				    <div class="">
+				        <div class="date-container">
+				            <p class="input-group">
+				
+				              <input type="text" class="form-control" datepicker-popup=""MM-dd-yyyy" ng-model="$parent.fromDate" is-open="fromDateOpened" min-date="minDate" max-date="'2016-06-22'" datepicker-options="fromDateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+				              <span class="input-group-btn">
+				                <button type="button" class="btn btn-default" ng-click="openFromDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+				              </span>
+				            </p>
+				        </div>
+				    </div>
+			        <div class="date-label">To:</div>
+			        <div class="">
+			            <div class="date-container">
+			                <p class="input-group">
+			                  <input type="text" class="form-control" datepicker-popup="yyyy-MM-dd" ng-model="$parent.toDate" is-open="toDateOpened" min-date="minDate" max-date="'2016-01-01'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+			                  <span class="input-group-btn">
+			                    <button type="button" class="btn btn-default" ng-click="openToDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+			                  </span>
+			                </p>
+			            </div>
+			        </div>
+
+					<div style="float: right; margin-top: 0px">
+						<div class="btn-group">
+							<label class="btn btn-primary" ng-model="selectedDuration" btn-radio="'1'"  ng-click="selectInterval(1)">Day</label>
+							<label class="btn btn-primary" ng-model="selectedDuration" btn-radio="'7'"  ng-click="selectInterval(7)">Week</label>
+							<label class="btn btn-primary" ng-model="selectedDuration" btn-radio="'30'" ng-click="selectInterval(30)" ng-disabled="checked">Month</label>
+						</div>
+					</div>
+
+				</div>
+
+
+
+					<div class="legendContainer" >
+						<h4 style="float: left; vertical-align: text-top">Legend</h4>
+						<ul id="legendList" style="float: left; margin-top: 10px">
+							<li class="legendListItem" >
+								<span style="color: rgba(220,220,220,1)">Total</span>
+								<button type="button" class="btn btn-primary legendButton" ng-model="toggleTotalCalls" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="false"   ng-click="toggleTotal()" >{{buttonTextTotal}}</button>
+							</li>
+							<li class="legendListItem" >
+								<span style="color: rgba(151,187,205,1)">Accepted</span>
+								<button type="button" class="btn btn-primary legendButton" ng-model="toggleAcceptedCalls" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="false"   ng-click="toggleAccepted()" >{{buttonTextAccepted}}</button>
+							</li>
+							<li class="legendListItem">
+								<span  style="color: rgba(220,100,100,1)">Escalated</span>
+								<button  type="button" class="btn btn-primary legendButton" ng-model="toggleEscalatedCalls" btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0"  ng-disabled="false"   ng-click="toggleEscalated()" >{{buttonTextEscalated}}</button>
+							</li>
+						</ul>
+					</div>
+		
+		
+			</div>
+		
+		</div>
+
+
+        <div class="modal-footer">
+            <!-- <button class="btn btn-primary" ng-click="ok()">OK</button> -->
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+
+  	<div id="spinner" class="loading"  style="display:block;">Loading</div>	
+  
+  
+</div>
+
+
+		
+		
